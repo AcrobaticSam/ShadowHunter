@@ -1,9 +1,8 @@
 # ShadowHunter
 This repository contains a mini game.
-Created By me & my classmates for our university(AUST) course : Software Development I  .
+Created By me & my classmates for our university(AUST) course : Software Development I  .[CSE 1200]
 
-Description:
-
+Description:::::
 IDE: Visual studio , Code blocks.
 
 Language: C,C++.
@@ -11,8 +10,7 @@ Language: C,C++.
 Platform : Windows Pc.
 
 
-Game Description:
-
+Game Description::::
 Name : Shadow Hunter.
 
 Genre : 2D Platform ,Puzzle.
