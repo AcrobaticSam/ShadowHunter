@@ -1,0 +1,9 @@
+#ifndef MOUSE_H_INCLUDED
+#define MOUSE_H_INCLUDED
+
+void mouse(int mx,int my)
+{
+    
+    
+}
+#endif // MOUSE_H_INCLUDED

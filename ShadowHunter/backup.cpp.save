@@ -1,0 +1,2789 @@
+#include "iGraphics.h"
+#include "bitmap_loader.h"
+#include<iostream>
+using namespace std;
+//////////////////////////////////////////////////////////////////////////////////////////////variable//////////////////////////////////////////////////////////////////////////////////////;
+//Variable Declare ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+//For images:::::::::::
+//Background::
+int background[500];
+//Charcacter::
+int boy[20];
+int lefto[20];
+int stand[20];
+int standback[20];
+//Objects::
+int crate;
+int portal[500];
+int portal2[500];
+int portal3[20];
+int bird[200];
+int frog[200];
+int bite[200];
+int rock;
+int triggers[20];
+//For co ordination::::::::::::::::::
+//for crate
+int cratex = 323, cratey = 34;
+//for boy
+int boyx = 323; int boyy = 31;
+//for portal
+int portalx = 1550, portaly = 60;
+//bird
+int birdsx = -30, birdsy = 280;
+//frog
+int frogx = 415, frogy = 68;
+int frogx2 = 990, frogy2 = 38;
+//rock
+int rockx = 405; int rocky = 268;
+int rockx2 = 680; int rocky2 = 165;
+
+//For changes::::::::::::::::::::::::::
+int speed = 6;
+int bitespeed = 10;
+int limit = boyy + 60;
+int downlimit = 37;
+int bit = frogx;
+int bit2 = frogx2;
+int healthbar = 200;
+
+//Counters::::::::::::::::::::::::::::
+int standcounter = 0;
+int portalindex = 0;
+//For Rendering:::::::::::::::::::::::
+int boyindex = 0;
+int boyindex2 = 0;
+int birdindex = 0;
+int frogindex = 0;
+int biteindex = 0;
+int portalindex2 = 0;
+
+//For instructions::::::::
+bool leftgo = false;
+bool rightgo = true;
+bool upgo = false;
+
+//For Game movements ::::::
+bool standy = true;
+bool standyback = false;
+bool lefty = false;
+bool righty = false;
+bool jumpy = false;
+bool down = false;
+bool catches = false;
+bool cratejump = false;
+bool cratejumpup = false;
+bool cratejumpdown = false;
+
+//animations:::::::::::::::
+bool slides = false;
+bool drop = false;
+bool drop2 = false;
+bool rockfall = false;
+bool trigger = false;
+bool frogshow = true;
+bool frogshow2 = true;
+bool frogbite = false;
+bool frogbite2 = false;
+//instruction::::::::::::
+int setkey = 1, setkey2 = 1, setkey3 = 1;
+
+//Levels::::::::::
+bool level1 = true;
+bool level2 = false;
+bool level3 = false;
+bool level4 = false;
+bool level5 = false;
+
+
+struct bricks
+{
+	int brickx;
+	int bricky;
+	bool show = true;
+};
+
+bricks brick[800];
+int x = 0, y = 0;
+//////////////////////////////////////////////////////////////////////////////////////////////drawinggs graphics game//////////////////////////////////////////////////////////////////////////////////////;
+void iDraw()
+{
+	iClear();
+	if (level1)
+	{
+		//Background::
+		iShowImage(0, 0, 1600, 320, background[1]);
+		//iShowImage(x, y, 2800, 1000, background[0]);
+		//Object::
+		iShowImage(cratex, cratey, 48, 48, crate);
+
+		//portal
+		iShowImage(portalx, portaly, 50, 100, portal[portalindex]);
+		///iShowImage(20, portaly, 145, 200, portal3[portalindex2]);
+
+		//birds
+		iShowImage(birdsx, birdsy, 52, 30, bird[birdindex]);
+		iShowImage(birdsx - 50, birdsy - 20, 52, 30, bird[birdindex]);
+		///iShowImage(birdsx, birdsy, 52, 30, bird[birdindex]);
+		iShowImage(birdsx + 50, birdsy - 20, 52, 30, bird[birdindex]);
+
+
+
+		//Character::
+		if (standy)
+			iShowImage(boyx, boyy, 30, 51, stand[boyindex2]);
+		if (standyback)
+			iShowImage(boyx, boyy, 30, 51, standback[boyindex2]);
+		if (!standy)
+		{
+			if (righty)
+			{
+				iShowImage(boyx, boyy, 30, 51, boy[boyindex]);
+				standcounter++;
+				if (standcounter >= 500)
+				{
+					standcounter = 0;
+					boyindex = 0;
+					standy = true;
+				}
+			}
+		}
+		if (!standyback)
+		{
+			if (lefty)
+			{
+				iShowImage(boyx, boyy, 30, 51, lefto[boyindex]);
+				standcounter++;
+				if (standcounter >= 500)
+				{
+					standcounter = 0;
+					boyindex = 0;
+					standyback = true;
+				}
+			}
+		}
+
+		//Instructions::
+		if (rightgo)
+		{
+			iSetColor(255, 255, 0);
+			iText(289, 180, "Hold 'D' To GO Right", GLUT_BITMAP_TIMES_ROMAN_24);
+		}
+		if (leftgo)
+		{
+			iSetColor(255, 0, 0);
+			iText(289, 180, "Hold 'A' To GO Left", GLUT_BITMAP_TIMES_ROMAN_24);
+		}
+		if (upgo)
+		{
+			iSetColor(255, 0, 255);
+			iText(289, 180, "Hold 'W' To GO Jump", GLUT_BITMAP_TIMES_ROMAN_24);
+		}
+	}
+	//level2------------------------------------------------------------------------------------------------------------------------------------------------------
+	if (level2)
+	{
+		//Background::
+		iShowImage(0, 0, 1600, 320, background[2]);
+		//healthbar
+		iSetColor(200, 200, 200);
+		iText(0, 290, "Health:", GLUT_BITMAP_HELVETICA_18);
+		iSetColor(0, 0, 0);
+		iRectangle(60, 290, healthbar, 10);
+		iSetColor(255, 0, 0);
+		iFilledRectangle(60, 290, healthbar, 10);
+		//portal
+		iShowImage(portalx, portaly, 50, 100, portal2[portalindex]);
+		iShowImage(portalx + 1540, portaly - 10, 50, 100, portal[portalindex]);
+		//frog 1
+		//idle
+		if (frogshow&&rocky >= 92)
+			iShowImage(frogx, frogy, 30, 22, frog[frogindex]);
+		//bite
+		if (frogbite&&rocky >= 92)
+		{
+			iShowImage(frogx, frogy, 30, 22, bite[biteindex]);
+			iSetColor(0, 0, 0);
+			iFilledCircle(bit, frogy + 10, 5);
+		}
+		//frog2
+		//idle
+		if (frogshow2 && rocky2 >= 64)
+			iShowImage(frogx2, frogy2, 30, 22, frog[frogindex]);
+		//bite
+		if (frogbite2 && rocky2 >= 64)
+		{
+			iShowImage(frogx2, frogy2, 30, 22, bite[biteindex]);
+			iSetColor(0, 0, 0);
+			iFilledCircle(bit2, frogy2 + 10, 5);
+		}
+		//rock1
+		iShowImage(rockx, rocky, 43, 45, rock);
+		//rock2
+		iShowImage(rockx2, rocky2, 43, 45, rock);
+		//trigger
+		if (!trigger)
+			iShowImage(40, 136, 50, 50, triggers[0]);
+		if (trigger)
+			iShowImage(40, 136, 80, 100, triggers[1]);
+		//biting trigger frog1
+		if (boyx >= 310 && rocky >= 200)
+		{
+			frogbite = true;
+			frogshow = false;
+		}
+		else
+		{
+			frogbite = false;
+			frogshow = true;
+		}
+
+		//biting trigger frog2
+		if (boyx >= 850 && rocky2 >= 80 && boyy <= 70)
+		{
+			frogbite2 = true;
+			frogshow2 = false;
+		}
+		else
+		{
+			frogbite2 = false;
+			frogshow2 = true;
+		}
+
+		//Character::
+		if (standy)
+			iShowImage(boyx, boyy, 30, 51, stand[boyindex2]);
+		if (standyback)
+			iShowImage(boyx, boyy, 30, 51, standback[boyindex2]);
+		if (!standy)
+		{
+			if (righty)
+			{
+				iShowImage(boyx, boyy, 30, 51, boy[boyindex]);
+				standcounter++;
+				if (standcounter >= 500)
+				{
+					standcounter = 0;
+					boyindex = 0;
+					standy = true;
+				}
+			}
+		}
+		if (!standyback)
+		{
+			if (lefty)
+			{
+				iShowImage(boyx, boyy, 30, 51, lefto[boyindex]);
+				standcounter++;
+				if (standcounter >= 500)
+				{
+					standcounter = 0;
+					boyindex = 0;
+					standyback = true;
+				}
+			}
+		}
+	}
+}
+
+
+void iMouseMove(int mx, int my)
+{
+
+}
+void iMouse(int button, int state, int mx, int my)
+{
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		cout << mx << endl << my << endl;
+	}
+	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+	{
+	}
+}
+//////////////////////////////////////////////////////////////////////////////////////////////controls//////////////////////////////////////////////////////////////////////////////////////;
+void iKeyboard(unsigned char key)
+{
+	if (key == 'q')
+	{
+		exit(0);
+	}
+	//leftmovekey::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+	if (key == 'a')
+	{
+
+		//Triggers
+		lefty = true;
+		righty = false;
+		standy = false;
+		standyback = false;
+		if (level1)
+		{
+			//left move instructions
+			if (!rightgo)
+				setkey2++;
+			if (setkey2 >= 5)
+			{
+				leftgo = false;
+				upgo = true;
+				setkey = 200;
+			}
+			//Boy move left
+			if (boyx >= 0)
+				boyx -= speed;
+			//sliding
+			//start
+			if (boyx + 30 >= 1240)
+				//slides = true;
+				//stop
+			if (boyx + 30 >= 1290)
+			{
+				slides = false;
+				boyy += 4;
+				boyx -= speed;
+			}
+			//Rendering
+			boyindex++;
+			if (boyindex == 7)
+				boyindex = 0;
+
+			//object move left
+			if (catches)
+			{
+				if (cratex >= 0)
+					cratex -= speed;
+			}
+			//drop from crate::
+			if (boyx <= 800)
+			{
+				//right
+				if (!(boyx >= cratex &&boyx <= cratex + 30))
+				{
+					if (boyy >= cratey + 25)
+					{
+						drop2 = true;
+					}
+
+				}
+				//left
+				if ((boyx - 10 >= cratex &&boyx <= cratex + 30))
+				{
+					if (boyy >= cratey + 40)
+					{
+						drop2 = true;
+					}
+
+				}
+			}
+		}
+		//end of level 1:::::::::::::
+		if (level2)
+		{
+			//Rendering
+			boyindex++;
+			if (boyindex == 7)
+				boyindex = 0;
+			//movement
+			if (boyx + 30 >= 30 || boyx + 30 >= 270)
+				boyx -= speed;
+			//slide	down
+			if (boyx + 30 >= 186 && boyx + 30 <= 270 && boyy <= 90)
+			{
+				boyy -= 4;
+				boyx -= speed;
+			}
+			//slide up
+			if (boyx + 30 >= 186 && boyx + 30 <= 270 && boyy >= 90)
+			{
+				boyy += 5;
+				boyx -= speed;
+			}
+
+			if (boyx + 30 <= 640)
+			{
+				if (boyy >= 160)
+					drop = true;
+			}
+			if (boyx + 30 <= 1098 && boyx + 30 >= 1090)
+			{
+				boyy -= 23;
+				boyx -= 20;
+			}
+			if (boyx + 30 >= 1355 && boyx + 30 <= 1415)
+			{
+				boyy += 3;
+			}
+
+		}
+
+
+	}
+	//right move key***************************************************************************************************************************************
+	if (key == 'd')
+	{
+		//Triggers
+		lefty = false;
+		righty = true;
+		standy = false;
+		standyback = false;
+		if (level1)
+		{
+			//right move instructions
+			setkey++;
+			if (setkey == 10)
+			{
+				rightgo = false;
+				leftgo = true;
+			}
+
+			//Boy move right
+			if (boyx + 30 <= 833)
+				boyx += speed;
+			if (boyx + 30 >= 833 && boyx + 30 <= 1242 && boyy >= 116)
+				boyx += speed;
+			//sliding
+			if (boyx + 30 >= 1240)
+				slides = true;
+
+			if (boyx + 30 >= 1270)
+			{
+				slides = false;
+				boyx += speed;
+			}
+			if (boyx + 30 >= 1475)
+			{
+				drop = true;
+			}
+			if (boyx + 30 >= 1480 && boyy <= 68)
+			{
+				drop = false;
+			}
+			//activating level2::
+			if (boyx >= 1530)
+			{
+				level2 = true;
+				level1 = false;
+				//reseting boy
+				boyx = 130;
+				boyy = 34;
+				//resetig portal
+				portalx = 10;
+				portaly = 30;
+			}
+			//Rendering
+			boyindex++;
+			if (boyindex == 7)
+				boyindex = 0;
+
+			//object move right
+			if (catches)
+			{
+				if (cratex + 48 <= 833)
+					cratex += speed;
+			}
+			//dropping again
+			if (boyx <= 800)
+			{
+				if (!(boyx >= cratex &&boyx <= cratex + 30))
+				{
+					if (boyy >= cratey + 25)
+					{
+						drop2 = true;
+					}
+
+				}
+			}
+		}
+		//-------------------------------------level2----------------------------
+		if (level2)
+		{
+			//Rendering
+			boyindex++;
+			if (boyindex == 7)
+				boyindex = 0;
+			//rightmove
+			if (boyx + 30 <= 186 || boyx + 30 >= 270)
+			{
+				if (!(boyx >= 960 && boyy >= 150))
+				{
+					if (!frogbite || boyx <= 370)
+					{
+						boyx += speed;
+					}
+
+				}
+
+			}
+
+
+			//sliding up
+			if (boyx + 30 >= 186 && boyx + 30 <= 270 && boyx + 30 <= 490 && boyy <= 90)
+			{
+				boyy += 2;
+				boyx += speed;
+			}
+			//2,
+			if (boyx + 30 >= 1355 && boyx + 30 <= 1415)
+			{
+				boyy -= 3;
+			}
+			//sliding down
+			if (boyx + 30 >= 186 && boyx + 30 <= 270 && boyx + 30 <= 490 && boyy >= 90)
+			{
+				boyy -= 3;
+				boyx += speed;
+			}
+
+			//boyfall trigger
+			//1,
+			if (boyx + 30 >= 298 && boyx + 30 <= 530 && boyy >= 73)
+			{
+				drop = true;
+			}
+			//2,
+			if (boyx + 30 >= 530 && boyx + 30 <= 580 && boyy >= 60 && boyy <= 65)
+			{
+				drop = true;
+			}
+			//3,
+			if (boyx + 30 >= 1000)
+			{
+				if (boyy >= 160)
+					drop = true;
+			}
+			//rockfall trigger
+			if (catches)
+			{
+				if (boyy <= 150)
+				{
+					rockx += speed;
+
+					if (rockx >= 506)
+					{
+						catches = false;
+						drop2 = true;
+					}
+				}
+				//rock2
+				if (boyy >= 150)
+				{
+					rockx2 += speed;
+
+					if (rockx2 >= 985)
+					{
+						catches = false;
+						drop2 = true;
+					}
+				}
+
+			}
+		}
+	}
+
+	//Jumpkey************************************************************************************************************************************
+	if (key == 'w')
+	{
+		//Triggers
+		//lefty = false;
+		//righty = false;
+		standy = false;
+
+		if (level1)
+		{
+			//UP instructions
+			if (!leftgo)
+				setkey3++;
+			if (setkey3 >= 2)
+			{
+				if (!leftgo&&!rightgo)
+					setkey2 = -600;
+				upgo = false;
+
+			}
+
+			//Jump
+
+			//cratejump
+			if (boyy >= cratey + 25)
+			{
+				if (boyx >= cratex &&boyx <= cratex + 48)
+				{
+					cratejump = true;
+					cratejumpup = true;
+
+				}
+				else
+				{
+					cratejump = false;
+					cratejumpup = false;
+					jumpy = true;
+				}
+			}
+			//normal jump
+			else
+			{
+
+				if (!jumpy&&!down)
+				{
+					jumpy = true;
+				}
+			}
+
+		}
+		//end of level1::::::::::::::::::::::::::::::::::::::::::::::::::::::
+		if (level2)
+		{
+			if (!jumpy&&!down && (!(boyx + 30 >= 186 && boyx + 30 <= 270)))
+			{
+				jumpy = true;
+			}
+		}
+	}
+	//manually changing vertical co ord: 
+	//up
+	if (key == 'E')
+	{
+		boyy += speed;
+
+	}
+	//down
+	if (key == 'Q')
+	{
+		boyy += speed;
+
+	}
+	//Interaction keys***************************************************************************************************************************
+	if (key == 'c')
+	{
+		//for grabing objects
+		if (level1)
+		{
+			if (boyx + 30 >= cratex && boyx + 30 <= cratex + 48)
+				catches = true;
+			else
+				catches = false;
+		}
+
+		if (level2)
+		{
+			//for interact with trigger
+			if (boyx >= 78 && boyx <= 109)
+			{
+				if (boyy >= 130 && rocky >= 100)
+				{
+
+					trigger = true;
+				}
+				else
+					trigger = false;
+			}
+			if (trigger)
+			{
+				rockfall = true;
+			}
+
+			//for interact with rock
+
+			if (boyx + 30 >= rockx && boyx + 30 <= rockx + 30)
+			{
+				if (rocky <= 200 && rocky >= 0)
+				{
+					catches = true;
+				}
+				else
+					catches = false;
+			}
+
+			//for interact with rock2
+			if (boyx + 30 >= rockx2 && boyx + 30 <= rockx2 + 30)
+			{
+				if (rocky2 <= 200 && rocky2 >= 0)
+				{
+					catches = true;
+				}
+				else
+					catches = false;
+			}
+		}
+
+	}
+	if (key == 'r')
+	{
+		//For releasing
+		catches = false;
+	}
+	if (key == ' ')
+	{
+
+	}
+
+}
+void iPassiveMouse(int a, int b)
+{
+
+}
+void colorchange()
+{
+
+
+}
+
+void iSpecialKeyboard(unsigned char key)
+{
+
+	if (key == GLUT_KEY_END)
+	{
+		exit(0);
+	}
+	if (key == GLUT_KEY_RIGHT)
+	{
+		boyx += speed;
+		if (x >= -600)
+			x -= 10;
+	}
+	if (key == GLUT_KEY_LEFT)
+	{
+		boyx -= speed;
+	}
+	if (key == GLUT_KEY_UP)
+	{
+		boyy += speed;
+	}
+	if (key == GLUT_KEY_DOWN)
+	{
+		boyy -= speed;
+	}
+	if (key == GLUT_KEY_F1)
+	{
+		level1 = true;
+		level2 = false;
+		level3 = false;
+		//reseting boy position
+		boyx = 323;
+		boyy = 31;
+	}
+	if (key == GLUT_KEY_F2)
+	{
+		level1 = false;
+		level2 = true;
+		level3 = false;
+		//reseting boy position
+		boyx = 130;
+		boyy = 34;
+	}
+	if (key == GLUT_KEY_F3)
+	{
+		level3 = true;
+		level2 = false;
+		level1 = false;
+	}
+
+
+}
+void setbricks()
+{
+	int bkx = 100;
+	int bky = 850;
+	for (int i = 0; i < 800; i++)
+	{
+		brick[i].brickx = bkx;
+		brick[i].bricky = bky;
+		bkx += 100;
+		if (bkx >= 1800)
+		{
+			bkx = 100;
+			bky += 20;
+		}
+	}
+}
+//////////////////////////////////////////////////////////////////////////////////////////////image animations//////////////////////////////////////////////////////////////////////////////////////;
+
+void reset()
+{
+	level1 = false;
+	level2 = true;
+	level3 = false;
+	//reseting boy position
+	boyx = 130;
+	boyy = 34;
+	healthbar = 200;
+}
+//Jump render function::
+void jumper()
+{
+	//------------------------------------------level1---------------------------------------------------------------------------------
+	if (level1)
+	{
+		//Going up
+		if (jumpy)
+		{
+			boyy += speed;
+			if (boyx <= 820)
+			{
+
+				//standing over crate
+				if (boyx >= cratex &&boyx <= cratex + 48)
+				{
+					if (boyy >= cratey + 25)
+					{
+						down = false;
+						jumpy = false;
+
+					}
+
+				}
+
+				if (boyy >= limit)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+
+			if (boyx >= 820)
+			{
+
+				if (boyy >= limit + limit)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			//moving horizontallly right
+			if (righty)
+				boyx++;
+			//moving horizontallly left
+			if (lefty)
+				boyx--;
+
+
+
+
+		}
+
+		//going down
+		if (down)
+		{
+			//moving horizontallly right
+			if (righty)
+				boyx++;
+			//moving horizontallly left
+			if (lefty)
+				boyx--;
+			//moving down
+			boyy -= speed;
+
+			if (boyx <= 880)
+			{
+				if (boyy <= downlimit)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			if (boyx >= 824 && boyx <= 1231)
+			{
+				if (boyy <= downlimit + 94)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			if (boyx >= 1231 && boyx <= 1456)
+			{
+				if (boyy <= downlimit + 60)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			if (boyx >= 1456 && boyx <= 1600)
+			{
+				if (boyy <= downlimit + 30)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+
+		}
+
+
+		if (cratejump)
+		{
+			if (cratejumpup)
+			{
+				boyx += 2;
+				boyy += speed;
+				if (boyy >= limit + 50)
+				{
+					cratejumpdown = true;
+					cratejumpup = false;
+				}
+
+			}
+			if (cratejumpdown)
+			{
+				boyx += 2;
+				boyy -= speed;
+				if (boyx >= 820)
+				{
+					if (boyy <= 132)
+					{
+						cratejumpdown = false;
+						cratejumpup = false;
+					}
+				}
+				else
+				{
+					if (boyy <= 36)
+					{
+						cratejumpdown = false;
+						cratejumpup = false;
+					}
+				}
+
+			}
+
+		}
+		if (slides)
+		{
+			boyy--;
+			boyx += 2;
+			if (boyx >= 1280)
+				slides = false;
+
+		}
+		if (drop)
+		{
+			if (level1)
+			{
+				boyy -= 3;
+				if (boyy <= 66)
+				{
+					drop = false;
+				}
+			}
+
+		}
+		if (drop2)
+		{
+			boyy -= 3;
+			if (boyy <= 36)
+			{
+				drop2 = false;
+			}
+		}
+	}
+	//-------------------------------------------------level2---------------------------------------------------------------------------------
+	if (level2)
+	{
+		//going up
+		if (jumpy)
+		{
+			//no jump area;
+
+
+			//changing y co ord
+			if (boyx >= 780 && boyx <= 800 && rocky2 >= 140)
+
+				boyy += 3;
+			if (boyx >= 780 && boyx <= 800 && rocky2 <= 140 && boyy >= 34)
+
+				boyy -= 3;
+
+			else
+
+				boyy += speed;
+
+			//restricion
+			if (boyx + 30 <= 186)
+			{
+				if (boyy >= limit)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			else if (boyx + 30 >= 256 && boyx + 30 <= 298)
+			{
+				if (boyy >= 98)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			else if (boyx + 30 >= 298 && boyx + 30 <= 313)
+			{
+				boyx -= 2;
+				if (boyy >= 98)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			else if (boyx + 30 >= 313 && boyx + 30 <= 480)
+			{
+				if (boyy >= limit + 40)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			else if (boyx + 30 >= 480 && boyx <= 650)
+			{
+				if (boyx + 30 <= 680)
+					boyx += 5;
+				if (boyy >= limit + 40)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			else if (boyx >= 650 && boyx <= 780)
+			{
+				if (boyy >= limit - 10)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			if (boyx >= 780 && boyx <= 800)
+			{
+				if (boyy >= 160)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			if (boyx >= 800)
+			{
+				if (boyy >= limit - 10)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			if (boyx + 30 >= 1060 && boyx + 30 <= 1100)
+			{
+				boyx += 4;
+				if (boyy >= limit)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+
+
+		}
+		//going down
+		if (down)
+		{
+			boyy -= speed;
+			if (boyx + 30 <= 186)
+			{
+				if (boyy <= 34)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			else if (boyx + 30 >= 186 && boyx + 30 <= 480)
+			{
+				if (boyy <= 66)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+
+			if (boyx + 30 >= 480)
+			{
+				if (boyx <= 630)
+					boyx += 6;
+				if (boyy <= 34)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			if (boyx + 30 >= 1060 && boyx + 30 <= 1600)
+			{
+				boyx += 4;
+
+				if (boyy <= 64)
+					down = false;
+				jumpy = false;
+
+			}
+
+
+
+		}
+
+		if (drop)
+		{
+			if (level2)
+			{
+				if (boyx + 30 <= 510)
+				{
+					boyy -= 4;
+					if (boyy <= 64)
+					{
+						drop = false;
+					}
+				}
+
+				if (boyx + 30 >= 510 && boyx + 30 <= 600)
+				{
+					boyy -= 4;
+					if (boyy <= -80)
+					{
+						drop = false;
+						reset();
+
+					}
+				}
+			}
+		}
+		if (drop2)
+		{
+			if (level2&&boyy <= 150)
+			{
+				rocky -= 5;
+				if (rocky <= -100)
+					drop2 = false;
+			}
+			if (level2&&boyy >= 150)
+			{
+				rocky2 -= 5;
+				if (rocky2 <= 39)
+					drop2 = false;
+			}
+		}
+	}
+	if (level2)
+	{
+		//fogbite bullet animation
+		if (frogbite)
+		{
+			bit -= bitespeed;
+			if (bit <= 260)
+				bit = 415;
+			if (boyy <= 100)
+			{
+				if (bit <= boyx + 30 && bit >= boyx)
+				{
+					healthbar -= 50;
+					if (boyx + 30 >= 400 || boyx + 30 >= 500)
+					{
+						healthbar = 0;
+					}
+					if (healthbar == 0)
+						reset();
+				}
+			}
+		}
+		//for frog 2:
+		if (frogbite2)
+		{
+			bit2 -= bitespeed;
+			if (bit2 <= 815)
+				bit2 = frogx2;
+			if (boyy <= 100)
+			{
+				if (bit2 <= boyx + 30 && bit2 >= boyx)
+				{
+					healthbar -= 50;
+					if (boyx + 30 >= 980 || boyx >= 1000)
+					{
+						healthbar = 0;
+					}
+					if (healthbar == 0)
+						reset();
+				}
+			}
+		}
+	}
+
+
+}
+void standanimation()
+{
+	//Stand animation
+	boyindex2++;
+	if (boyindex2 == 2)
+		boyindex2 = 0;
+
+	//frog animation
+	frogindex++;
+	if (frogindex == 5)
+		frogindex = 0;
+}
+void portalanimation()
+{
+	portalindex++;
+	if (portalindex == 7)
+		portalindex = 0;
+
+	portalindex2++;
+	if (portalindex2 == 3)
+		portalindex2 = 0;
+
+	//frog bite animation
+	biteindex++;
+	if (biteindex == 10)
+		biteindex = 0;
+
+}
+void birdanimation()
+{
+	//Bird animation
+	//bird move
+	birdsx += 10;
+	if (birdsx >= 1600)
+		birdsx = -60;
+	//render
+	birdindex++;
+	if (birdindex == 3)
+		birdindex = 0;
+	//rock falling animation
+	if (rockfall)
+	{
+		if (rocky <= 66)
+		{
+			rockfall = false;
+		}
+		if (rocky >= 66)
+			rocky -= 10;
+		if (rocky <= 92)
+		{
+
+			frogshow = false;
+			frogbite = false;
+
+		}
+
+
+
+	}
+}
+//////////////////////////////////////////////////////////////////////////////////////////////image loader//////////////////////////////////////////////////////////////////////////////////////;
+int main()
+{
+	iSetTimer(50, jumper);
+	iSetTimer(200, standanimation);
+	iSetTimer(100, portalanimation);
+	iSetTimer(140, birdanimation);
+	iInitialize(1600, 320, "Shadow");
+	//iInitialize(1900, 1000, "Shadow");
+	//Images:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+	//Background:::::::::::
+	background[0] = iLoadImage("images\\background4.png");
+	background[1] = iLoadImage("images\\background3.png");
+	background[2] = iLoadImage("images\\jungle5.png");
+
+	//Character::::::::::::
+	//Boystand
+	stand[0] = iLoadImage("images\\boy\\boystand (1).png");
+	stand[1] = iLoadImage("images\\boy\\boystand (2).png");
+	stand[2] = iLoadImage("images\\boy\\boystand (1).png");
+	standback[0] = iLoadImage("images\\boy\\boystandback (1).png");
+	standback[1] = iLoadImage("images\\boy\\boystandback (2).png");
+	standback[2] = iLoadImage("images\\boy\\boystandback (1).png");
+	//Boywalk::
+	//Right
+	boy[0] = iLoadImage("images\\boy\\boy (1).png");
+	boy[1] = iLoadImage("images\\boy\\boy (2).png");
+	boy[2] = iLoadImage("images\\boy\\boy (3).png");
+	boy[3] = iLoadImage("images\\boy\\boy (4).png");
+	boy[4] = iLoadImage("images\\boy\\boy (5).png");
+	boy[5] = iLoadImage("images\\boy\\boy (6).png");
+	boy[6] = iLoadImage("images\\boy\\boy (7).png");
+	boy[7] = iLoadImage("images\\boy\\boy (8).png");
+	//left
+	lefto[0] = iLoadImage("images\\boy\\left\\walkleft (1).png");
+	lefto[1] = iLoadImage("images\\boy\\left\\walkleft (2).png");
+	lefto[2] = iLoadImage("images\\boy\\left\\walkleft (3).png");
+	lefto[3] = iLoadImage("images\\boy\\left\\walkleft (4).png");
+	lefto[4] = iLoadImage("images\\boy\\left\\walkleft (5).png");
+	lefto[5] = iLoadImage("images\\boy\\left\\walkleft (6).png");
+	lefto[6] = iLoadImage("images\\boy\\left\\walkleft (7).png");
+	lefto[7] = iLoadImage("images\\boy\\left\\walkleft (8).png");
+
+
+	//Object:::::::::::::::
+	//Crate
+	crate = iLoadImage("images\\crate.gif");
+	//Portal
+	portal[0] = iLoadImage("images\\portal\\portal (1).png");
+	portal[1] = iLoadImage("images\\portal\\portal (2).png");
+	portal[2] = iLoadImage("images\\portal\\portal (3).png");
+	portal[3] = iLoadImage("images\\portal\\portal (4).png");
+	portal[4] = iLoadImage("images\\portal\\portal (5).png");
+	portal[5] = iLoadImage("images\\portal\\portal (6).png");
+	portal[6] = iLoadImage("images\\portal\\portal (7).png");
+	portal[7] = iLoadImage("images\\portal\\portal (8).png");
+	portal2[0] = iLoadImage("images\\portal\\portal2 (1).png");
+	portal2[1] = iLoadImage("images\\portal\\portal2 (2).png");
+	portal2[2] = iLoadImage("images\\portal\\portal2 (3).png");
+	portal2[3] = iLoadImage("images\\portal\\portal2 (4).png");
+	portal2[4] = iLoadImage("images\\portal\\portal2 (5).png");
+	portal2[5] = iLoadImage("images\\portal\\portal2 (6).png");
+	portal2[6] = iLoadImage("images\\portal\\portal2 (7).png");
+	portal2[7] = iLoadImage("images\\portal\\portal2 (8).png");
+	portal3[0] = iLoadImage("images\\portal\\portal3 (1).png");
+	portal3[1] = iLoadImage("images\\portal\\portal3 (2).png");
+	portal3[2] = iLoadImage("images\\portal\\portal3 (3).png");
+	portal3[3] = iLoadImage("images\\portal\\portal3 (4).png");
+
+	//Bird
+	bird[0] = iLoadImage("images\\birds\\bird (1).png");
+	bird[1] = iLoadImage("images\\birds\\bird (2).png");
+	bird[2] = iLoadImage("images\\birds\\bird (3).png");
+	bird[3] = iLoadImage("images\\birds\\bird (4).png");
+
+	//frog::
+	//idle
+	frog[0] = iLoadImage("images\\frog\\frog (1).png");
+	frog[1] = iLoadImage("images\\frog\\frog (2).png");
+	frog[2] = iLoadImage("images\\frog\\frog (3).png");
+	frog[3] = iLoadImage("images\\frog\\frog (4).png");
+	frog[4] = iLoadImage("images\\frog\\frog (5).png");
+	//attack
+	bite[0] = iLoadImage("images\\frog\\Bite\\bite (1).png");
+	bite[1] = iLoadImage("images\\frog\\Bite\\bite (2).png");
+	bite[2] = iLoadImage("images\\frog\\Bite\\bite (3).png");
+	bite[3] = iLoadImage("images\\frog\\Bite\\bite (4).png");
+	bite[4] = iLoadImage("images\\frog\\Bite\\bite (5).png");
+	bite[5] = iLoadImage("images\\frog\\Bite\\bite (6).png");
+	bite[6] = iLoadImage("images\\frog\\Bite\\bite (7).png");
+	bite[7] = iLoadImage("images\\frog\\Bite\\bite (8).png");
+	bite[8] = iLoadImage("images\\frog\\Bite\\bite (9).png");
+	bite[9] = iLoadImage("images\\frog\\Bite\\bite (10).png");
+	bite[10] = iLoadImage("images\\frog\\Bite\\bite (1).png");
+
+	//rock
+	rock = iLoadImage("images\\rock.png");
+
+	//trigger
+	triggers[0] = iLoadImage("images\\trigger.png");
+	triggers[1] = iLoadImage("images\\triggered.png");
+	iStart();
+
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include "iGraphics.h"
+#include "bitmap_loader.h"
+#include<iostream>
+using namespace std;
+//////////////////////////////////////////////////////////////////////////////////////////////variable//////////////////////////////////////////////////////////////////////////////////////;
+//Variable Declare ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+//For images:::::::::::
+//Background::
+int background[500];
+//Charcacter::
+int boy[20];
+int lefto[20];
+int stand[20];
+int standback[20];
+//Objects::
+int crate;
+int portal[500];
+int portal2[500];
+int portal3[20];
+int bird[200];
+int frog[200];
+int bite[200];
+int rock;
+int triggers[20];
+//For co ordination::::::::::::::::::
+//for crate
+int cratex = 323, cratey = 34;
+//for boy
+int boyx = 323; int boyy = 31;
+//for portal
+int portalx = 1550, portaly = 60;
+//bird
+int birdsx = -30, birdsy = 280;
+//frog
+int frogx = 415, frogy = 68;
+int frogx2 = 990, frogy2 = 38;
+//rock
+int rockx = 405; int rocky = 268;
+int rockx2 = 680; int rocky2 = 165;
+
+//For changes::::::::::::::::::::::::::
+int speed = 6;
+int bitespeed = 10;
+int limit = boyy + 60;
+int downlimit = 37;
+int bit = frogx;
+int bit2 = frogx2;
+int healthbar = 200;
+
+//Counters::::::::::::::::::::::::::::
+int standcounter = 0;
+int portalindex = 0;
+//For Rendering:::::::::::::::::::::::
+int boyindex = 0;
+int boyindex2 = 0;
+int birdindex = 0;
+int frogindex = 0;
+int biteindex = 0;
+int portalindex2 = 0;
+
+//For instructions::::::::
+bool leftgo = false;
+bool rightgo = true;
+bool upgo = false;
+
+//For Game movements ::::::
+bool standy = true;
+bool standyback = false;
+bool lefty = false;
+bool righty = false;
+bool jumpy = false;
+bool down = false;
+bool catches = false;
+bool cratejump = false;
+bool cratejumpup = false;
+bool cratejumpdown = false;
+
+//animations:::::::::::::::
+bool slides = false;
+bool drop = false;
+bool drop2 = false;
+bool rockfall = false;
+bool trigger = false;
+bool frogshow = true;
+bool frogshow2 = true;
+bool frogbite = false;
+bool frogbite2 = false;
+//instruction::::::::::::
+int setkey = 1, setkey2 = 1, setkey3 = 1;
+
+//Levels::::::::::
+bool level1 = true;
+bool level2 = false;
+bool level3 = false;
+bool level4 = false;
+bool level5 = false;
+
+
+struct bricks
+{
+	int brickx;
+	int bricky;
+	bool show = true;
+};
+
+bricks brick[800];
+int x = 0, y = 0;
+//////////////////////////////////////////////////////////////////////////////////////////////drawinggs graphics game//////////////////////////////////////////////////////////////////////////////////////;
+void iDraw()
+{
+	iClear();
+	if (level1)
+	{
+		//Background::
+		iShowImage(0, 0, 1600, 320, background[1]);
+		//iShowImage(x, y, 2800, 1000, background[0]);
+		//Object::
+		iShowImage(cratex, cratey, 48, 48, crate);
+
+		//portal
+		iShowImage(portalx, portaly, 50, 100, portal[portalindex]);
+		///iShowImage(20, portaly, 145, 200, portal3[portalindex2]);
+
+		//birds
+		iShowImage(birdsx, birdsy, 52, 30, bird[birdindex]);
+		iShowImage(birdsx - 50, birdsy - 20, 52, 30, bird[birdindex]);
+		///iShowImage(birdsx, birdsy, 52, 30, bird[birdindex]);
+		iShowImage(birdsx + 50, birdsy - 20, 52, 30, bird[birdindex]);
+
+
+
+		//Character::
+		if (standy)
+			iShowImage(boyx, boyy, 30, 51, stand[boyindex2]);
+		if (standyback)
+			iShowImage(boyx, boyy, 30, 51, standback[boyindex2]);
+		if (!standy)
+		{
+			if (righty)
+			{
+				iShowImage(boyx, boyy, 30, 51, boy[boyindex]);
+				standcounter++;
+				if (standcounter >= 500)
+				{
+					standcounter = 0;
+					boyindex = 0;
+					standy = true;
+				}
+			}
+		}
+		if (!standyback)
+		{
+			if (lefty)
+			{
+				iShowImage(boyx, boyy, 30, 51, lefto[boyindex]);
+				standcounter++;
+				if (standcounter >= 500)
+				{
+					standcounter = 0;
+					boyindex = 0;
+					standyback = true;
+				}
+			}
+		}
+
+		//Instructions::
+		if (rightgo)
+		{
+			iSetColor(255, 255, 0);
+			iText(289, 180, "Hold 'D' To GO Right", GLUT_BITMAP_TIMES_ROMAN_24);
+		}
+		if (leftgo)
+		{
+			iSetColor(255, 0, 0);
+			iText(289, 180, "Hold 'A' To GO Left", GLUT_BITMAP_TIMES_ROMAN_24);
+		}
+		if (upgo)
+		{
+			iSetColor(255, 0, 255);
+			iText(289, 180, "Hold 'W' To GO Jump", GLUT_BITMAP_TIMES_ROMAN_24);
+		}
+	}
+	//level2------------------------------------------------------------------------------------------------------------------------------------------------------
+	if (level2)
+	{
+		//Background::
+		iShowImage(0, 0, 1600, 320, background[2]);
+		//healthbar
+		iSetColor(200, 200, 200);
+		iText(0, 290, "Health:", GLUT_BITMAP_HELVETICA_18);
+		iSetColor(0, 0, 0);
+		iRectangle(60, 290, healthbar, 10);
+		iSetColor(255, 0, 0);
+		iFilledRectangle(60, 290, healthbar, 10);
+		//portal
+		iShowImage(portalx, portaly, 50, 100, portal2[portalindex]);
+		iShowImage(portalx + 1540, portaly - 10, 50, 100, portal[portalindex]);
+		//frog 1
+		//idle
+		if (frogshow&&rocky >= 92)
+			iShowImage(frogx, frogy, 30, 22, frog[frogindex]);
+		//bite
+		if (frogbite&&rocky >= 92)
+		{
+			iShowImage(frogx, frogy, 30, 22, bite[biteindex]);
+			iSetColor(0, 0, 0);
+			iFilledCircle(bit, frogy + 10, 5);
+		}
+		//frog2
+		//idle
+		if (frogshow2 && rocky2 >= 64)
+			iShowImage(frogx2, frogy2, 30, 22, frog[frogindex]);
+		//bite
+		if (frogbite2 && rocky2 >= 64)
+		{
+			iShowImage(frogx2, frogy2, 30, 22, bite[biteindex]);
+			iSetColor(0, 0, 0);
+			iFilledCircle(bit2, frogy2 + 10, 5);
+		}
+		//rock1
+		iShowImage(rockx, rocky, 43, 45, rock);
+		//rock2
+		iShowImage(rockx2, rocky2, 43, 45, rock);
+		//trigger
+		if (!trigger)
+			iShowImage(40, 136, 50, 50, triggers[0]);
+		if (trigger)
+			iShowImage(40, 136, 80, 100, triggers[1]);
+		//biting trigger frog1
+		if (boyx >= 310 && rocky >= 200)
+		{
+			frogbite = true;
+			frogshow = false;
+		}
+		else
+		{
+			frogbite = false;
+			frogshow = true;
+		}
+
+		//biting trigger frog2
+		if (boyx >= 850 && rocky2 >= 80 && boyy <= 70)
+		{
+			frogbite2 = true;
+			frogshow2 = false;
+		}
+		else
+		{
+			frogbite2 = false;
+			frogshow2 = true;
+		}
+
+		//Character::
+		if (standy)
+			iShowImage(boyx, boyy, 30, 51, stand[boyindex2]);
+		if (standyback)
+			iShowImage(boyx, boyy, 30, 51, standback[boyindex2]);
+		if (!standy)
+		{
+			if (righty)
+			{
+				iShowImage(boyx, boyy, 30, 51, boy[boyindex]);
+				standcounter++;
+				if (standcounter >= 500)
+				{
+					standcounter = 0;
+					boyindex = 0;
+					standy = true;
+				}
+			}
+		}
+		if (!standyback)
+		{
+			if (lefty)
+			{
+				iShowImage(boyx, boyy, 30, 51, lefto[boyindex]);
+				standcounter++;
+				if (standcounter >= 500)
+				{
+					standcounter = 0;
+					boyindex = 0;
+					standyback = true;
+				}
+			}
+		}
+	}
+}
+
+
+void iMouseMove(int mx, int my)
+{
+
+}
+void iMouse(int button, int state, int mx, int my)
+{
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		cout << mx << endl << my << endl;
+	}
+	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+	{
+	}
+}
+//////////////////////////////////////////////////////////////////////////////////////////////controls//////////////////////////////////////////////////////////////////////////////////////;
+void iKeyboard(unsigned char key)
+{
+	if (key == 'q')
+	{
+		exit(0);
+	}
+	//leftmovekey::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+	if (key == 'a')
+	{
+
+		//Triggers
+		lefty = true;
+		righty = false;
+		standy = false;
+		standyback = false;
+		if (level1)
+		{
+			//left move instructions
+			if (!rightgo)
+				setkey2++;
+			if (setkey2 >= 5)
+			{
+				leftgo = false;
+				upgo = true;
+				setkey = 200;
+			}
+			//Boy move left
+			if (boyx >= 0)
+				boyx -= speed;
+			//sliding
+			//start
+			if (boyx + 30 >= 1240)
+				//slides = true;
+				//stop
+			if (boyx + 30 >= 1290)
+			{
+				slides = false;
+				boyy += 4;
+				boyx -= speed;
+			}
+			//Rendering
+			boyindex++;
+			if (boyindex == 7)
+				boyindex = 0;
+
+			//object move left
+			if (catches)
+			{
+				if (cratex >= 0)
+					cratex -= speed;
+			}
+			//drop from crate::
+			if (boyx <= 800)
+			{
+				//right
+				if (!(boyx >= cratex &&boyx <= cratex + 30))
+				{
+					if (boyy >= cratey + 25)
+					{
+						drop2 = true;
+					}
+
+				}
+				//left
+				if ((boyx - 10 >= cratex &&boyx <= cratex + 30))
+				{
+					if (boyy >= cratey + 40)
+					{
+						drop2 = true;
+					}
+
+				}
+			}
+		}
+		//end of level 1:::::::::::::
+		if (level2)
+		{
+			//Rendering
+			boyindex++;
+			if (boyindex == 7)
+				boyindex = 0;
+			//movement
+			if (boyx + 30 >= 30 || boyx + 30 >= 270)
+				boyx -= speed;
+			//slide	down
+			if (boyx + 30 >= 186 && boyx + 30 <= 270 && boyy <= 90)
+			{
+				boyy -= 4;
+				boyx -= speed;
+			}
+			//slide up
+			if (boyx + 30 >= 186 && boyx + 30 <= 270 && boyy >= 90)
+			{
+				boyy += 5;
+				boyx -= speed;
+			}
+
+			if (boyx + 30 <= 640)
+			{
+				if (boyy >= 160)
+					drop = true;
+			}
+			if (boyx + 30 <= 1098 && boyx + 30 >= 1090)
+			{
+				boyy -= 23;
+				boyx -= 20;
+			}
+			if (boyx + 30 >= 1355 && boyx + 30 <= 1415)
+			{
+				boyy += 3;
+			}
+
+		}
+
+
+	}
+	//right move key***************************************************************************************************************************************
+	if (key == 'd')
+	{
+		//Triggers
+		lefty = false;
+		righty = true;
+		standy = false;
+		standyback = false;
+		if (level1)
+		{
+			//right move instructions
+			setkey++;
+			if (setkey == 10)
+			{
+				rightgo = false;
+				leftgo = true;
+			}
+
+			//Boy move right
+			if (boyx + 30 <= 833)
+				boyx += speed;
+			if (boyx + 30 >= 833 && boyx + 30 <= 1242 && boyy >= 116)
+				boyx += speed;
+			//sliding
+			if (boyx + 30 >= 1240)
+				slides = true;
+
+			if (boyx + 30 >= 1270)
+			{
+				slides = false;
+				boyx += speed;
+			}
+			if (boyx + 30 >= 1475)
+			{
+				drop = true;
+			}
+			if (boyx + 30 >= 1480 && boyy <= 68)
+			{
+				drop = false;
+			}
+			//activating level2::
+			if (boyx >= 1530)
+			{
+				level2 = true;
+				level1 = false;
+				//reseting boy
+				boyx = 130;
+				boyy = 34;
+				//resetig portal
+				portalx = 10;
+				portaly = 30;
+			}
+			//Rendering
+			boyindex++;
+			if (boyindex == 7)
+				boyindex = 0;
+
+			//object move right
+			if (catches)
+			{
+				if (cratex + 48 <= 833)
+					cratex += speed;
+			}
+			//dropping again
+			if (boyx <= 800)
+			{
+				if (!(boyx >= cratex &&boyx <= cratex + 30))
+				{
+					if (boyy >= cratey + 25)
+					{
+						drop2 = true;
+					}
+
+				}
+			}
+		}
+		//-------------------------------------level2----------------------------
+		if (level2)
+		{
+			//Rendering
+			boyindex++;
+			if (boyindex == 7)
+				boyindex = 0;
+			//rightmove
+			if (boyx + 30 <= 186 || boyx + 30 >= 270)
+			{
+				if (!(boyx >= 960 && boyy >= 150))
+				{
+					if (!frogbite || boyx <= 370)
+					{
+						boyx += speed;
+					}
+
+				}
+
+			}
+
+
+			//sliding up
+			if (boyx + 30 >= 186 && boyx + 30 <= 270 && boyx + 30 <= 490 && boyy <= 90)
+			{
+				boyy += 2;
+				boyx += speed;
+			}
+			//2,
+			if (boyx + 30 >= 1355 && boyx + 30 <= 1415)
+			{
+				boyy -= 3;
+			}
+			//sliding down
+			if (boyx + 30 >= 186 && boyx + 30 <= 270 && boyx + 30 <= 490 && boyy >= 90)
+			{
+				boyy -= 3;
+				boyx += speed;
+			}
+
+			//boyfall trigger
+			//1,
+			if (boyx + 30 >= 298 && boyx + 30 <= 530 && boyy >= 73)
+			{
+				drop = true;
+			}
+			//2,
+			if (boyx + 30 >= 530 && boyx + 30 <= 580 && boyy >= 60 && boyy <= 65)
+			{
+				drop = true;
+			}
+			//3,
+			if (boyx + 30 >= 1000)
+			{
+				if (boyy >= 160)
+					drop = true;
+			}
+			//rockfall trigger
+			if (catches)
+			{
+				if (boyy <= 150)
+				{
+					rockx += speed;
+
+					if (rockx >= 506)
+					{
+						catches = false;
+						drop2 = true;
+					}
+				}
+				//rock2
+				if (boyy >= 150)
+				{
+					rockx2 += speed;
+
+					if (rockx2 >= 985)
+					{
+						catches = false;
+						drop2 = true;
+					}
+				}
+
+			}
+		}
+	}
+
+	//Jumpkey************************************************************************************************************************************
+	if (key == 'w')
+	{
+		//Triggers
+		//lefty = false;
+		//righty = false;
+		standy = false;
+
+		if (level1)
+		{
+			//UP instructions
+			if (!leftgo)
+				setkey3++;
+			if (setkey3 >= 2)
+			{
+				if (!leftgo&&!rightgo)
+					setkey2 = -600;
+				upgo = false;
+
+			}
+
+			//Jump
+
+			//cratejump
+			if (boyy >= cratey + 25)
+			{
+				if (boyx >= cratex &&boyx <= cratex + 48)
+				{
+					cratejump = true;
+					cratejumpup = true;
+
+				}
+				else
+				{
+					cratejump = false;
+					cratejumpup = false;
+					jumpy = true;
+				}
+			}
+			//normal jump
+			else
+			{
+
+				if (!jumpy&&!down)
+				{
+					jumpy = true;
+				}
+			}
+
+		}
+		//end of level1::::::::::::::::::::::::::::::::::::::::::::::::::::::
+		if (level2)
+		{
+			if (!jumpy&&!down && (!(boyx + 30 >= 186 && boyx + 30 <= 270)))
+			{
+				jumpy = true;
+			}
+		}
+	}
+	//manually changing vertical co ord: 
+	//up
+	if (key == 'E')
+	{
+		boyy += speed;
+
+	}
+	//down
+	if (key == 'Q')
+	{
+		boyy += speed;
+
+	}
+	//Interaction keys***************************************************************************************************************************
+	if (key == 'c')
+	{
+		//for grabing objects
+		if (level1)
+		{
+			if (boyx + 30 >= cratex && boyx + 30 <= cratex + 48)
+				catches = true;
+			else
+				catches = false;
+		}
+
+		if (level2)
+		{
+			//for interact with trigger
+			if (boyx >= 78 && boyx <= 109)
+			{
+				if (boyy >= 130 && rocky >= 100)
+				{
+
+					trigger = true;
+				}
+				else
+					trigger = false;
+			}
+			if (trigger)
+			{
+				rockfall = true;
+			}
+
+			//for interact with rock
+
+			if (boyx + 30 >= rockx && boyx + 30 <= rockx + 30)
+			{
+				if (rocky <= 200 && rocky >= 0)
+				{
+					catches = true;
+				}
+				else
+					catches = false;
+			}
+
+			//for interact with rock2
+			if (boyx + 30 >= rockx2 && boyx + 30 <= rockx2 + 30)
+			{
+				if (rocky2 <= 200 && rocky2 >= 0)
+				{
+					catches = true;
+				}
+				else
+					catches = false;
+			}
+		}
+
+	}
+	if (key == 'r')
+	{
+		//For releasing
+		catches = false;
+	}
+	if (key == ' ')
+	{
+
+	}
+
+}
+void iPassiveMouse(int a, int b)
+{
+
+}
+void colorchange()
+{
+
+
+}
+
+void iSpecialKeyboard(unsigned char key)
+{
+
+	if (key == GLUT_KEY_END)
+	{
+		exit(0);
+	}
+	if (key == GLUT_KEY_RIGHT)
+	{
+		boyx += speed;
+		if (x >= -600)
+			x -= 10;
+	}
+	if (key == GLUT_KEY_LEFT)
+	{
+		boyx -= speed;
+	}
+	if (key == GLUT_KEY_UP)
+	{
+		boyy += speed;
+	}
+	if (key == GLUT_KEY_DOWN)
+	{
+		boyy -= speed;
+	}
+	if (key == GLUT_KEY_F1)
+	{
+		level1 = true;
+		level2 = false;
+		level3 = false;
+		//reseting boy position
+		boyx = 323;
+		boyy = 31;
+	}
+	if (key == GLUT_KEY_F2)
+	{
+		level1 = false;
+		level2 = true;
+		level3 = false;
+		//reseting boy position
+		boyx = 130;
+		boyy = 34;
+	}
+	if (key == GLUT_KEY_F3)
+	{
+		level3 = true;
+		level2 = false;
+		level1 = false;
+	}
+
+
+}
+void setbricks()
+{
+	int bkx = 100;
+	int bky = 850;
+	for (int i = 0; i < 800; i++)
+	{
+		brick[i].brickx = bkx;
+		brick[i].bricky = bky;
+		bkx += 100;
+		if (bkx >= 1800)
+		{
+			bkx = 100;
+			bky += 20;
+		}
+	}
+}
+//////////////////////////////////////////////////////////////////////////////////////////////image animations//////////////////////////////////////////////////////////////////////////////////////;
+
+void reset()
+{
+	level1 = false;
+	level2 = true;
+	level3 = false;
+	//reseting boy position
+	boyx = 130;
+	boyy = 34;
+	healthbar = 200;
+}
+//Jump render function::
+void jumper()
+{
+	//------------------------------------------level1---------------------------------------------------------------------------------
+	if (level1)
+	{
+		//Going up
+		if (jumpy)
+		{
+			boyy += speed;
+			if (boyx <= 820)
+			{
+
+				//standing over crate
+				if (boyx >= cratex &&boyx <= cratex + 48)
+				{
+					if (boyy >= cratey + 25)
+					{
+						down = false;
+						jumpy = false;
+
+					}
+
+				}
+
+				if (boyy >= limit)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+
+			if (boyx >= 820)
+			{
+
+				if (boyy >= limit + limit)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			//moving horizontallly right
+			if (righty)
+				boyx++;
+			//moving horizontallly left
+			if (lefty)
+				boyx--;
+
+
+
+
+		}
+
+		//going down
+		if (down)
+		{
+			//moving horizontallly right
+			if (righty)
+				boyx++;
+			//moving horizontallly left
+			if (lefty)
+				boyx--;
+			//moving down
+			boyy -= speed;
+
+			if (boyx <= 880)
+			{
+				if (boyy <= downlimit)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			if (boyx >= 824 && boyx <= 1231)
+			{
+				if (boyy <= downlimit + 94)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			if (boyx >= 1231 && boyx <= 1456)
+			{
+				if (boyy <= downlimit + 60)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			if (boyx >= 1456 && boyx <= 1600)
+			{
+				if (boyy <= downlimit + 30)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+
+		}
+
+
+		if (cratejump)
+		{
+			if (cratejumpup)
+			{
+				boyx += 2;
+				boyy += speed;
+				if (boyy >= limit + 50)
+				{
+					cratejumpdown = true;
+					cratejumpup = false;
+				}
+
+			}
+			if (cratejumpdown)
+			{
+				boyx += 2;
+				boyy -= speed;
+				if (boyx >= 820)
+				{
+					if (boyy <= 132)
+					{
+						cratejumpdown = false;
+						cratejumpup = false;
+					}
+				}
+				else
+				{
+					if (boyy <= 36)
+					{
+						cratejumpdown = false;
+						cratejumpup = false;
+					}
+				}
+
+			}
+
+		}
+		if (slides)
+		{
+			boyy--;
+			boyx += 2;
+			if (boyx >= 1280)
+				slides = false;
+
+		}
+		if (drop)
+		{
+			if (level1)
+			{
+				boyy -= 3;
+				if (boyy <= 66)
+				{
+					drop = false;
+				}
+			}
+
+		}
+		if (drop2)
+		{
+			boyy -= 3;
+			if (boyy <= 36)
+			{
+				drop2 = false;
+			}
+		}
+	}
+	//-------------------------------------------------level2---------------------------------------------------------------------------------
+	if (level2)
+	{
+		//going up
+		if (jumpy)
+		{
+			//no jump area;
+
+
+			//changing y co ord
+			if (boyx >= 780 && boyx <= 800 && rocky2 >= 140)
+
+				boyy += 3;
+			if (boyx >= 780 && boyx <= 800 && rocky2 <= 140 && boyy >= 34)
+
+				boyy -= 3;
+
+			else
+
+				boyy += speed;
+
+			//restricion
+			if (boyx + 30 <= 186)
+			{
+				if (boyy >= limit)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			else if (boyx + 30 >= 256 && boyx + 30 <= 298)
+			{
+				if (boyy >= 98)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			else if (boyx + 30 >= 298 && boyx + 30 <= 313)
+			{
+				boyx -= 2;
+				if (boyy >= 98)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			else if (boyx + 30 >= 313 && boyx + 30 <= 480)
+			{
+				if (boyy >= limit + 40)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			else if (boyx + 30 >= 480 && boyx <= 650)
+			{
+				if (boyx + 30 <= 680)
+					boyx += 5;
+				if (boyy >= limit + 40)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			else if (boyx >= 650 && boyx <= 780)
+			{
+				if (boyy >= limit - 10)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			if (boyx >= 780 && boyx <= 800)
+			{
+				if (boyy >= 160)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			if (boyx >= 800)
+			{
+				if (boyy >= limit - 10)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+			if (boyx + 30 >= 1060 && boyx + 30 <= 1100)
+			{
+				boyx += 4;
+				if (boyy >= limit)
+				{
+					down = true;
+					jumpy = false;
+				}
+			}
+
+
+		}
+		//going down
+		if (down)
+		{
+			boyy -= speed;
+			if (boyx + 30 <= 186)
+			{
+				if (boyy <= 34)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			else if (boyx + 30 >= 186 && boyx + 30 <= 480)
+			{
+				if (boyy <= 66)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+
+			if (boyx + 30 >= 480)
+			{
+				if (boyx <= 630)
+					boyx += 6;
+				if (boyy <= 34)
+				{
+					down = false;
+					jumpy = false;
+				}
+			}
+			if (boyx + 30 >= 1060 && boyx + 30 <= 1600)
+			{
+				boyx += 4;
+
+				if (boyy <= 64)
+					down = false;
+				jumpy = false;
+
+			}
+
+
+
+		}
+
+		if (drop)
+		{
+			if (level2)
+			{
+				if (boyx + 30 <= 510)
+				{
+					boyy -= 4;
+					if (boyy <= 64)
+					{
+						drop = false;
+					}
+				}
+
+				if (boyx + 30 >= 510 && boyx + 30 <= 600)
+				{
+					boyy -= 4;
+					if (boyy <= -80)
+					{
+						drop = false;
+						reset();
+
+					}
+				}
+			}
+		}
+		if (drop2)
+		{
+			if (level2&&boyy <= 150)
+			{
+				rocky -= 5;
+				if (rocky <= -100)
+					drop2 = false;
+			}
+			if (level2&&boyy >= 150)
+			{
+				rocky2 -= 5;
+				if (rocky2 <= 39)
+					drop2 = false;
+			}
+		}
+	}
+	if (level2)
+	{
+		//fogbite bullet animation
+		if (frogbite)
+		{
+			bit -= bitespeed;
+			if (bit <= 260)
+				bit = 415;
+			if (boyy <= 100)
+			{
+				if (bit <= boyx + 30 && bit >= boyx)
+				{
+					healthbar -= 50;
+					if (boyx + 30 >= 400 || boyx + 30 >= 500)
+					{
+						healthbar = 0;
+					}
+					if (healthbar == 0)
+						reset();
+				}
+			}
+		}
+		//for frog 2:
+		if (frogbite2)
+		{
+			bit2 -= bitespeed;
+			if (bit2 <= 815)
+				bit2 = frogx2;
+			if (boyy <= 100)
+			{
+				if (bit2 <= boyx + 30 && bit2 >= boyx)
+				{
+					healthbar -= 50;
+					if (boyx + 30 >= 980 || boyx >= 1000)
+					{
+						healthbar = 0;
+					}
+					if (healthbar == 0)
+						reset();
+				}
+			}
+		}
+	}
+
+
+}
+void standanimation()
+{
+	//Stand animation
+	boyindex2++;
+	if (boyindex2 == 2)
+		boyindex2 = 0;
+
+	//frog animation
+	frogindex++;
+	if (frogindex == 5)
+		frogindex = 0;
+}
+void portalanimation()
+{
+	portalindex++;
+	if (portalindex == 7)
+		portalindex = 0;
+
+	portalindex2++;
+	if (portalindex2 == 3)
+		portalindex2 = 0;
+
+	//frog bite animation
+	biteindex++;
+	if (biteindex == 10)
+		biteindex = 0;
+
+}
+void birdanimation()
+{
+	//Bird animation
+	//bird move
+	birdsx += 10;
+	if (birdsx >= 1600)
+		birdsx = -60;
+	//render
+	birdindex++;
+	if (birdindex == 3)
+		birdindex = 0;
+	//rock falling animation
+	if (rockfall)
+	{
+		if (rocky <= 66)
+		{
+			rockfall = false;
+		}
+		if (rocky >= 66)
+			rocky -= 10;
+		if (rocky <= 92)
+		{
+
+			frogshow = false;
+			frogbite = false;
+
+		}
+
+
+
+	}
+}
+//////////////////////////////////////////////////////////////////////////////////////////////image loader//////////////////////////////////////////////////////////////////////////////////////;
+int main()
+{
+	iSetTimer(50, jumper);
+	iSetTimer(200, standanimation);
+	iSetTimer(100, portalanimation);
+	iSetTimer(140, birdanimation);
+	iInitialize(1600, 320, "Shadow");
+	//iInitialize(1900, 1000, "Shadow");
+	//Images:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+	//Background:::::::::::
+	background[0] = iLoadImage("images\\background4.png");
+	background[1] = iLoadImage("images\\background3.png");
+	background[2] = iLoadImage("images\\jungle5.png");
+
+	//Character::::::::::::
+	//Boystand
+	stand[0] = iLoadImage("images\\boy\\boystand (1).png");
+	stand[1] = iLoadImage("images\\boy\\boystand (2).png");
+	stand[2] = iLoadImage("images\\boy\\boystand (1).png");
+	standback[0] = iLoadImage("images\\boy\\boystandback (1).png");
+	standback[1] = iLoadImage("images\\boy\\boystandback (2).png");
+	standback[2] = iLoadImage("images\\boy\\boystandback (1).png");
+	//Boywalk::
+	//Right
+	boy[0] = iLoadImage("images\\boy\\boy (1).png");
+	boy[1] = iLoadImage("images\\boy\\boy (2).png");
+	boy[2] = iLoadImage("images\\boy\\boy (3).png");
+	boy[3] = iLoadImage("images\\boy\\boy (4).png");
+	boy[4] = iLoadImage("images\\boy\\boy (5).png");
+	boy[5] = iLoadImage("images\\boy\\boy (6).png");
+	boy[6] = iLoadImage("images\\boy\\boy (7).png");
+	boy[7] = iLoadImage("images\\boy\\boy (8).png");
+	//left
+	lefto[0] = iLoadImage("images\\boy\\left\\walkleft (1).png");
+	lefto[1] = iLoadImage("images\\boy\\left\\walkleft (2).png");
+	lefto[2] = iLoadImage("images\\boy\\left\\walkleft (3).png");
+	lefto[3] = iLoadImage("images\\boy\\left\\walkleft (4).png");
+	lefto[4] = iLoadImage("images\\boy\\left\\walkleft (5).png");
+	lefto[5] = iLoadImage("images\\boy\\left\\walkleft (6).png");
+	lefto[6] = iLoadImage("images\\boy\\left\\walkleft (7).png");
+	lefto[7] = iLoadImage("images\\boy\\left\\walkleft (8).png");
+
+
+	//Object:::::::::::::::
+	//Crate
+	crate = iLoadImage("images\\crate.gif");
+	//Portal
+	portal[0] = iLoadImage("images\\portal\\portal (1).png");
+	portal[1] = iLoadImage("images\\portal\\portal (2).png");
+	portal[2] = iLoadImage("images\\portal\\portal (3).png");
+	portal[3] = iLoadImage("images\\portal\\portal (4).png");
+	portal[4] = iLoadImage("images\\portal\\portal (5).png");
+	portal[5] = iLoadImage("images\\portal\\portal (6).png");
+	portal[6] = iLoadImage("images\\portal\\portal (7).png");
+	portal[7] = iLoadImage("images\\portal\\portal (8).png");
+	portal2[0] = iLoadImage("images\\portal\\portal2 (1).png");
+	portal2[1] = iLoadImage("images\\portal\\portal2 (2).png");
+	portal2[2] = iLoadImage("images\\portal\\portal2 (3).png");
+	portal2[3] = iLoadImage("images\\portal\\portal2 (4).png");
+	portal2[4] = iLoadImage("images\\portal\\portal2 (5).png");
+	portal2[5] = iLoadImage("images\\portal\\portal2 (6).png");
+	portal2[6] = iLoadImage("images\\portal\\portal2 (7).png");
+	portal2[7] = iLoadImage("images\\portal\\portal2 (8).png");
+	portal3[0] = iLoadImage("images\\portal\\portal3 (1).png");
+	portal3[1] = iLoadImage("images\\portal\\portal3 (2).png");
+	portal3[2] = iLoadImage("images\\portal\\portal3 (3).png");
+	portal3[3] = iLoadImage("images\\portal\\portal3 (4).png");
+
+	//Bird
+	bird[0] = iLoadImage("images\\birds\\bird (1).png");
+	bird[1] = iLoadImage("images\\birds\\bird (2).png");
+	bird[2] = iLoadImage("images\\birds\\bird (3).png");
+	bird[3] = iLoadImage("images\\birds\\bird (4).png");
+
+	//frog::
+	//idle
+	frog[0] = iLoadImage("images\\frog\\frog (1).png");
+	frog[1] = iLoadImage("images\\frog\\frog (2).png");
+	frog[2] = iLoadImage("images\\frog\\frog (3).png");
+	frog[3] = iLoadImage("images\\frog\\frog (4).png");
+	frog[4] = iLoadImage("images\\frog\\frog (5).png");
+	//attack
+	bite[0] = iLoadImage("images\\frog\\Bite\\bite (1).png");
+	bite[1] = iLoadImage("images\\frog\\Bite\\bite (2).png");
+	bite[2] = iLoadImage("images\\frog\\Bite\\bite (3).png");
+	bite[3] = iLoadImage("images\\frog\\Bite\\bite (4).png");
+	bite[4] = iLoadImage("images\\frog\\Bite\\bite (5).png");
+	bite[5] = iLoadImage("images\\frog\\Bite\\bite (6).png");
+	bite[6] = iLoadImage("images\\frog\\Bite\\bite (7).png");
+	bite[7] = iLoadImage("images\\frog\\Bite\\bite (8).png");
+	bite[8] = iLoadImage("images\\frog\\Bite\\bite (9).png");
+	bite[9] = iLoadImage("images\\frog\\Bite\\bite (10).png");
+	bite[10] = iLoadImage("images\\frog\\Bite\\bite (1).png");
+
+	//rock
+	rock = iLoadImage("images\\rock.png");
+
+	//trigger
+	triggers[0] = iLoadImage("images\\trigger.png");
+	triggers[1] = iLoadImage("images\\triggered.png");
+	iStart();
+
+	return 0;
+}
+

@@ -1,0 +1,26 @@
+#ifndef SAVEGAME_H_INCLUDED
+#define SAVEGAME_H_INCLUDED
+
+typedef struct level level;
+struct level()
+{
+    int Boyx;
+    int Boyy;
+    bool Mode;
+    void getLevel(bool mode)
+    {
+        Mode= mode;
+    }
+    void getCoordinates(int boyx,int boyy)
+    {
+        Boyx= boyx;
+        Boyy =boyy;
+    }
+};
+
+void saveGame(int boyx,int boyy,char *level)
+{
+    FILE *fp= fopen("save.txt","a");
+    fwrite()
+}
+#endif // SAVEGAME_H_INCLUDED
