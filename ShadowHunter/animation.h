@@ -1,6 +1,7 @@
 #ifndef ANIMATION_H_INCLUDED
 #define ANIMATION_H_INCLUDED
-//Reseting function::
+
+//Reseting function:::::
 void reset()
 {
 	if (level2)
