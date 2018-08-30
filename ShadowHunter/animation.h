@@ -1,6 +1,5 @@
 #ifndef ANIMATION_H_INCLUDED
 #define ANIMATION_H_INCLUDED
-
 //Reseting function::
 void reset()
 {
