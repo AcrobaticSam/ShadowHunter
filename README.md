@@ -1,6 +1,5 @@
 # ShadowHunter
-This repository contains a mini game.
-Created By me & my classmates for our university (AUST) course : Software Development I. [CSE 1200]
+ShadowHunter is a adventure-puzzle based 2D Platform game.
 
 Description:::::
 
